@@ -181,8 +181,7 @@ async function requestMagicLink(req, res) {
       userId = rows[0].id;
     }
 
-    const token = await createAuthToken(email, "magic_link", userId);
-    await sendMagicLink(email, token);
+    await db.query(`UPDATE users SET is_verified=TRUE WHERE id=$1`, [user.id]);
 
     // Always return 200 (don't leak if email exists)
     res.json({ message: "Magic link sent! Check your inbox." });
