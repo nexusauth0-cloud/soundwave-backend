@@ -2,12 +2,15 @@ const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || "465"),
-  secure: true,
+  port: 587, // Standard port for cloud hosting
+  secure: false, // Must be false for port 587
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  tls: {
+    rejectUnauthorized: false // Prevents the connection from dropping
+  }
 });
 
 const BRAND_COLOR = "#00e5a0";
@@ -70,7 +73,7 @@ async function sendMagicLink(email, token) {
     to: email,
     subject: "Your SoundWave sign-in link",
     html: baseTemplate(`
-      <h2 style="font-size:24px;font-weight:800;margin:0 0 12px;color:#fff;">Your magic link ✨</h2>
+      <h2 style="font-size:24px;font-weight:800;margin:0 0 12px;color:#fff;">Your magic link  ✨</h2>
       <p style="color:#aaa;">Click below to sign in. Expires in ${process.env.MAGIC_LINK_EXPIRES_MINUTES || 15} minutes.</p>
       ${btn("Sign in to SoundWave", url)}
     `),
@@ -105,3 +108,4 @@ async function sendWelcomeEmail(email, displayName) {
 }
 
 module.exports = { sendVerificationEmail, sendMagicLink, sendPasswordReset, sendWelcomeEmail };
+
