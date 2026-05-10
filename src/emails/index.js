@@ -4,13 +4,17 @@ const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
   port: parseInt(process.env.SMTP_PORT || "465"),
-  secure: process.env.SMTP_PORT === "465", // true for 465, false for others
+  secure: process.env.SMTP_PORT === "465", 
   auth: {
     user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS, // Your new 16-character App Password
+    pass: process.env.SMTP_PASS,
   },
+  // We are increasing these to 25 seconds (60000ms)
+  connectionTimeout: 25000,
+  greetingTimeout: 30000,
+  socketTimeout: 25000,
   tls: {
-    rejectUnauthorized: false // Helps avoid handshake errors in some environments
+    rejectUnauthorized: false
   }
 });
 
