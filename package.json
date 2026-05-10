@@ -8,7 +8,8 @@
     "dev": "nodemon src/index.js",
     "db:migrate": "node src/db/migrate.js",
     "db:migrate-music": "node src/db/migrate-music.js",
-    "db:seed": "node src/db/seed.js"
+    "db:seed": "node src/db/seed.js",
+    "db:migrate-artists": "node src/db/migrate-artists.js"
   },
   "dependencies": {
     "axios": "^1.16.0",

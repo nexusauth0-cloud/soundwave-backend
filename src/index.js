@@ -21,6 +21,8 @@ app.use("/auth", authRoutes);
 app.use("/music", musicRoutes);
 const paymentRoutes = require("./routes/payment.routes");
 app.use("/payment", paymentRoutes);
+const artistRoutes = require("./routes/artist.routes");
+app.use("/artists", artistRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.get("/health", (req, res) => res.json({ status: "ok", service: "NexusAuth" }));
 app.use((req, res) => res.status(404).json({ error: "Not found" }));
