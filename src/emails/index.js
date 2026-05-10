@@ -5,22 +5,19 @@ const nodemailer = require("nodemailer");
  * Optimized for Render + Gmail
  */
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // Uses Gmail's internal settings automatically
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, // Must be false for port 587
-  pool: true,    // Keeps connection open to prevent handshake timeouts
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true, // Use SSL for port 465
   auth: {
     user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS, // Your 16-character App Password
+    pass: process.env.SMTP_PASS,
   },
-  // Higher timeouts to survive slow network handshakes on Render
+  // Extra-long timeouts for the Render free tier
   connectionTimeout: 15000, 
-  greetingTimeout: 10000,
+  greetingTimeout: 25000,
   socketTimeout: 20000,
   tls: {
-    rejectUnauthorized: false, // Bypasses local certificate issues
-    minVersion: 'TLSv1.2'
+    rejectUnauthorized: false
   }
 });
 
