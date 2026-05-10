@@ -1,33 +1,61 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
+const cookieParser = require("cookie-parser");
+const path = require("path");
+const { passport } = require("./config/passport");
 const authRoutes = require("./routes/auth.routes");
-// ... import your other routes here ...
+const musicRoutes = require("./routes/music.routes");
+const paymentRoutes = require("./routes/payment.routes");
+const artistRoutes = require("./routes/artist.routes");
 
 const app = express();
+const PORT = process.env.PORT || 4000;
 
-// --- CRITICAL FIX FOR RENDER PROXY ---
-app.set("trust proxy", 1); 
+app.set("trust proxy", 1);
+app.use(helmet({ crossOriginResourcePolicy: false }));
+app.use(cors({
+  origin: "*",
+  methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type","Authorization","Range"],
+  exposedHeaders: ["Content-Range","Accept-Ranges","Content-Length"],
+}));
+app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(passport.initialize());
 
-app.use(cors());
-app.use(express.json());
-
-// Routes
 app.use("/auth", authRoutes);
-// ... use your other routes here ...
+app.use("/music", musicRoutes);
+app.use("/payment", paymentRoutes);
+app.use("/artists", artistRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Health check
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", service: "NexusAuth", version: "1.0.0", timestamp: new Date().toISOString() });
 });
 
+app.use((req, res) => res.status(404).json({ error: "Not found" }));
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: "Server error" });
+});
 
-// Keep alive ping every 14 minutes (prevents Render free tier sleep)
-if (process.env.NODE_ENV === "production") {
+app.listen(PORT, () => {
+  console.log(`◈ NexusAuth running on port ${PORT}`);
+  console.log(`  Health: http://localhost:${PORT}/health`);
+});
+
+// Keep alive for Render free tier
+if (process.env.NODE_ENV === "production" && process.env.BACKEND_URL) {
   setInterval(() => {
     const https = require("https");
-    https.get(`https://soundwave-backend-0yd7.onrender.com/health`, (res) => {
-      console.log("Keep alive ping:", res.statusCode);
+    https.get(`${process.env.BACKEND_URL}/health`, () => {
+      console.log("Keep alive ping sent");
     }).on("error", () => {});
   }, 14 * 60 * 1000);
 }
+
+module.exports = app;
