@@ -1,3 +1,4 @@
+const userCtrl = require("../controllers/user.controller");
 const router = require("express").Router();
 const passport = require("passport");
 const rateLimit = require("express-rate-limit");
@@ -104,5 +105,7 @@ router.get("/github/callback",
 // ── Current user ──────────────────────────────────────────────────────────────
 router.get("/me", requireAuth, ctrl.me);
 router.post("/resend-verification", ctrl.resendVerification);
+
+router.get("/admin/users", requireAuth, userCtrl.getAllUsers);
 
 module.exports = router;
