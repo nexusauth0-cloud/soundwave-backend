@@ -1,70 +1,31 @@
 const nodemailer = require("nodemailer");
 
-// Create a reusable transporter object using the default SMTP transport
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: parseInt(process.env.SMTP_PORT || "465"),
-  secure: process.env.SMTP_PORT === "465", 
+  service: 'gmail',
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
-  // We are increasing these to 25 seconds (60000ms)
-  connectionTimeout: 25000,
-  greetingTimeout: 30000,
-  socketTimeout: 25000,
-  tls: {
-    rejectUnauthorized: false
-  }
+  // High timeouts for cloud latency
+  connectionTimeout: 60000, 
+  greetingTimeout: 60000,
 });
 
-const BRAND_COLOR = "#00e5a0";
-
-function baseTemplate(content) {
-  return `<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"/></head>
-<body style="margin:0;padding:0;background:#0a0a0a;font-family:Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;">
-    <tr><td align="center">
-      <table width="520" cellpadding="0" cellspacing="0" style="background:#111;border-radius:16px;border:1px solid #2a2a2a;">
-        <tr>
-          <td style="padding:32px 40px;background:linear-gradient(135deg,#001a0e,#0a0a0a);border-bottom:1px solid #2a2a2a;">
-            <span style="font-size:22px;font-weight:800;color:${BRAND_COLOR};">◈ SoundWave</span>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:40px;color:#f0f0f0;font-size:15px;line-height:1.7;">
-            ${content}
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:24px 40px;border-top:1px solid #2a2a2a;color:#555;font-size:12px;">
-            SoundWave · Powered by NexusAuth
-          </td>
-        </tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`;
-}
-
-async function sendVerificationEmail(email, token) {
-  const url = `${process.env.FRONTEND_URL}/auth/verify-email?token=${token}`;
-  return await transporter.sendMail({
-    from: process.env.EMAIL_FROM,
+const sendVerificationEmail = async (email, token) => {
+  const url = `${process.env.BACKEND_URL}/api/auth/verify-email?token=${token}`;
+  return transporter.sendMail({
+    from: `"SoundWave" <${process.env.SMTP_USER}>`,
     to: email,
-    subject: "Verify your SoundWave email",
-    html: baseTemplate(`
-      <h2 style="font-size:24px;font-weight:800;margin:0 0 12px;color:#fff;">Verify your email 📬</h2>
-      <p style="color:#aaa;">Welcome to SoundWave! Please click the button below to verify your email address.</p>
-      <div style="margin:28px 0;">
-        <a href="${url}" style="display:inline-block;padding:14px 32px;background:${BRAND_COLOR};color:#000;font-weight:700;font-size:15px;border-radius:30px;text-decoration:none;">Verify Email</a>
-      </div>
-    `),
+    subject: "Verify your SoundWave Account",
+    html: `<h1>Welcome!</h1><p>Click <a href="${url}">here</a> to verify.</p>`,
   });
-}
+};
 
-module.exports = { sendVerificationEmail };
+// Add your other email functions here (Welcome, Magic Link, Reset)
+// ensuring they use the transporter.sendMail() method.
+
+module.exports = { 
+  sendVerificationEmail, 
+  // Add other exports here...
+};
 
